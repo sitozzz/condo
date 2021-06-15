@@ -5397,6 +5397,7 @@ export type Mutation = {
   changePasswordWithToken?: Maybe<Scalars['String']>;
   registerNewOrganization?: Maybe<Organization>;
   inviteNewOrganizationEmployee?: Maybe<OrganizationEmployee>;
+  reInviteOrganizationEmployee?: Maybe<OrganizationEmployee>;
   acceptOrRejectOrganizationInviteById?: Maybe<OrganizationEmployee>;
   acceptOrRejectOrganizationInviteByCode?: Maybe<OrganizationEmployee>;
   sendMessage?: Maybe<SendMessageOutput>;
@@ -6807,6 +6808,11 @@ export type MutationRegisterNewOrganizationArgs = {
 
 export type MutationInviteNewOrganizationEmployeeArgs = {
   data: InviteNewOrganizationEmployeeInput;
+};
+
+
+export type MutationReInviteOrganizationEmployeeArgs = {
+  data: ReInviteOrganizationEmployeeInput;
 };
 
 
@@ -10167,6 +10173,14 @@ export type Query_AllMessagesMetaArgs = {
 
 export type Query_KsListsMetaArgs = {
   where?: Maybe<_KsListsMetaInput>;
+};
+
+export type ReInviteOrganizationEmployeeInput = {
+  dv: Scalars['Int'];
+  sender: Scalars['JSON'];
+  organization: OrganizationWhereUniqueInput;
+  email: Scalars['String'];
+  phone?: Maybe<Scalars['String']>;
 };
 
 export type RegisterNewOrganizationInput = {
