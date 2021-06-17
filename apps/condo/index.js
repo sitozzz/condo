@@ -4,6 +4,7 @@ const { GraphQLApp } = require('@keystonejs/app-graphql')
 const { AdminUIApp } = require('@keystonejs/app-admin-ui')
 const { StaticApp } = require('@keystonejs/app-static')
 const { NextApp } = require('@keystonejs/app-next')
+const { registerTriggers } = require('@core/triggers')
 const { createItems } = require('@keystonejs/server-side-graphql-client')
 
 const conf = require('@core/config')
@@ -57,6 +58,10 @@ registerSchemas(keystone, [
 
 registerTasks([
     require('@condo/domains/notification/tasks'),
+])
+
+registerTriggers([
+    require('@condo/domains/ticket/triggers'),
 ])
 
 function verifySchema (keystone) {
