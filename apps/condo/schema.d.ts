@@ -4336,7 +4336,7 @@ export type File = {
   publicUrl?: Maybe<Scalars['String']>;
 };
 
-/**  A keystone list  */
+/**  TODO DOC!  */
 export type ForgotPasswordAction = {
   __typename?: 'ForgotPasswordAction';
   /**
@@ -4353,9 +4353,13 @@ export type ForgotPasswordAction = {
   sender?: Maybe<Scalars['JSON']>;
   /**  Ref to the user. The object will be deleted if the user ceases to exist  */
   user?: Maybe<User>;
+  /**  TODO DOC!  */
   token?: Maybe<Scalars['String']>;
+  /**  TODO DOC!  */
   requestedAt?: Maybe<Scalars['String']>;
+  /**  TODO DOC!  */
   expiresAt?: Maybe<Scalars['String']>;
+  /**  TODO DOC!  */
   usedAt?: Maybe<Scalars['String']>;
   id: Scalars['ID'];
   v?: Maybe<Scalars['Int']>;
@@ -9630,6 +9634,7 @@ export type Query = {
   _MessagesMeta?: Maybe<_ListMeta>;
   /**  Retrieve the meta-data for all lists.  */
   _ksListsMeta?: Maybe<Array<Maybe<_ListMeta>>>;
+  checkPasswordRecoveryToken?: Maybe<Scalars['String']>;
   getPhoneByConfirmPhoneActionToken?: Maybe<Scalars['String']>;
   /** The version of the Keystone application serving this API. */
   appVersion?: Maybe<Scalars['String']>;
@@ -10789,6 +10794,11 @@ export type Query_AllMessagesMetaArgs = {
 
 export type Query_KsListsMetaArgs = {
   where?: Maybe<_KsListsMetaInput>;
+};
+
+
+export type QueryCheckPasswordRecoveryTokenArgs = {
+  token: Scalars['String'];
 };
 
 

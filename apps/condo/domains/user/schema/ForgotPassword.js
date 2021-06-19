@@ -31,7 +31,7 @@ const USER_OWNED_FIELD = {
 const ForgotPasswordAction = new GQLListSchema('ForgotPasswordAction', {
     fields: {
         dv: DV_FIELD,
-        sender: SENDER_FIELD,        
+        sender: SENDER_FIELD,
         user: USER_OWNED_FIELD,
         token: {
             type: Text,
@@ -234,7 +234,7 @@ const ForgotPasswordService = new GQLCustomSchema('ForgotPasswordService', {
                             id
                             usedAt
                           }
-                        }           
+                        }
                     `,
                     variables: { tokenId, now },
                 })
@@ -269,5 +269,5 @@ const ForgotPasswordService = new GQLCustomSchema('ForgotPasswordService', {
 
 module.exports = {
     ForgotPasswordAction,
-    ForgotPasswordService,
+    // ForgotPasswordService,
 }

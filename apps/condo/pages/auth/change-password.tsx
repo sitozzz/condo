@@ -5,13 +5,14 @@ import { useIntl } from '@core/next/intl'
 import { Form, Input, Typography } from 'antd'
 import { Button } from '@condo/domains/common/components/Button'
 import AuthLayout, { AuthLayoutContext, AuthPage } from '@condo/domains/common/components/containers/BaseLayout/AuthLayout'
-import React, { useState, useContext } from 'react'
+import React, { useState, useContext, useEffect } from 'react'
 import { MIN_PASSWORD_LENGTH } from '@condo/domains/user/constants/common'
 import { getQueryParams } from '@condo/domains/common/utils/url.utils'
 import { runMutation } from '@condo/domains/common/utils/mutations.utils'
-import { useMutation } from '@core/next/apollo'
-import { CHANGE_PASSWORD_WITH_TOKEN_MUTATION } from '@condo/domains/user/gql'
+import { useLazyQuery, useMutation } from '@core/next/apollo'
+import { CHANGE_PASSWORD_WITH_TOKEN_MUTATION, CHECK_PASSWORD_RECOVERY_TOKEN } from '@condo/domains/user/gql'
 import { useAuth } from '@core/next/auth'
+import { BasicEmptyListView } from '../../domains/common/components/EmptyListView'
 
 const INPUT_STYLE = { width: '20em' }
 
@@ -34,6 +35,9 @@ const ChangePasswordPage: AuthPage = () => {
     const PasswordIsTooShortMsg = intl.formatMessage({ id: 'pages.auth.PasswordIsTooShort' })
     const PleaseConfirmYourPasswordMsg = intl.formatMessage({ id: 'pages.auth.PleaseConfirmYourPassword' })
     const TwoPasswordDontMatchMsg = intl.formatMessage({ id: 'pages.auth.TwoPasswordDontMatch' })
+    const ChangePasswordTokenErrorLabel = intl.formatMessage({ id: 'pages.auth.ChangePasswordTokenErrorLabel' })
+    const ChangePasswordTokenErrorMessage = intl.formatMessage({ id: 'pages.auth.ChangePasswordTokenErrorMessage' })
+    const ChangePasswordTokenErrorConfirmLabel = intl.formatMessage({ id: 'pages.auth.ChangePasswordTokenErrorConfirmLabel' })
     const ErrorToFormFieldMsgMapping = {}
 
     const userId = get(auth, ['user', 'id'])
@@ -59,11 +63,34 @@ const ChangePasswordPage: AuthPage = () => {
         })
     }
 
+    const [checkPasswordRecoveryToken] = useLazyQuery(CHECK_PASSWORD_RECOVERY_TOKEN, {
+        onError: error => setRecoveryTokenError(error),
+        onCompleted: () => setRecoveryTokenError(null),
+    })
+    const [recoveryTokenError, setRecoveryTokenError] = useState<Error | null>(null)
+    useEffect(() => {
+        checkPasswordRecoveryToken({ variables: { token } })
+    }, [])
+
+    if (recoveryTokenError) {
+        return (
+            <BasicEmptyListView>
+                <Typography.Title level={3}>{ChangePasswordTokenErrorLabel}</Typography.Title>
+                <Typography.Text style={{ fontSize: '16px' }}>{ChangePasswordTokenErrorMessage}</Typography.Text>
+                <Button
+                    type='sberPrimary'
+                    style={{ marginTop: '16px' }}
+                    onClick={() => Router.push('/auth/forgot')}
+                >{ChangePasswordTokenErrorConfirmLabel}</Button>
+            </BasicEmptyListView>
+        )
+    }
+
     return (
         <div >
             <Typography.Title style={{ textAlign: 'left' }}>{ResetTitle}</Typography.Title>
             <Typography.Paragraph style={{ textAlign: 'left' }} >{CreateNewPasswordMsg}</Typography.Paragraph>
-                
+
             <Form
                 form={form}
                 name="change-password"
@@ -71,7 +98,7 @@ const ChangePasswordPage: AuthPage = () => {
                 initialValues={initialValues}
                 colon={false}
                 style={{ marginTop: '40px' }}
-                requiredMark={false}                
+                requiredMark={false}
             >
                 <Form.Item name="token" style={{ display: 'none' }}>
                     <Input type="hidden" />
@@ -80,7 +107,7 @@ const ChangePasswordPage: AuthPage = () => {
                     name="password"
                     label={PasswordMsg}
                     labelAlign='left'
-                    labelCol={{ flex: 1 }}                            
+                    labelCol={{ flex: 1 }}
                     rules={[
                         {
                             required: true,
@@ -98,8 +125,8 @@ const ChangePasswordPage: AuthPage = () => {
                     name="confirm"
                     label={ConfirmPasswordMsg}
                     labelAlign='left'
-                    labelCol={{ flex: 1 }}                            
-                    style={{ marginTop: '40px' }}                        
+                    labelCol={{ flex: 1 }}
+                    style={{ marginTop: '40px' }}
                     dependencies={['password']}
                     rules={[
                         {
@@ -114,7 +141,7 @@ const ChangePasswordPage: AuthPage = () => {
                                 return Promise.reject(TwoPasswordDontMatchMsg)
                             },
                         }),
-                    ]}                            
+                    ]}
                 >
                     <Input.Password  style={INPUT_STYLE}/>
                 </Form.Item>
@@ -124,7 +151,7 @@ const ChangePasswordPage: AuthPage = () => {
                             key='submit'
                             type='sberPrimary'
                             loading={isLoading}
-                            htmlType="submit" 
+                            htmlType="submit"
                         >
                             {SaveMsg}
                         </Button>
