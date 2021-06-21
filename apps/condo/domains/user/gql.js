@@ -35,8 +35,8 @@ const SIGNIN_MUTATION = gql`
 `
 
 const CHANGE_PASSWORD_WITH_TOKEN_MUTATION = gql`
-    mutation changePasswordWithToken($token: String!, $password: String!) {
-        status: changePasswordWithToken(token: $token, password: $password)
+    mutation changePasswordWithToken($data: ChangePasswordWithTokenInput!) {
+        result: changePasswordWithToken(data: $data) { status }
     }
 `
 
@@ -51,14 +51,14 @@ const SIGNIN_BY_PHONE_AND_PASSWORD_MUTATION = gql`
 `
 
 const START_PASSWORD_RECOVERY_MUTATION = gql`
-    mutation startPasswordRecovery($email: String!, $dv: Int!, $sender: JSON!) {
-        status: startPasswordRecovery(email: $email, dv: $dv, sender: $sender)
+    mutation startPasswordRecovery($data: StartPasswordRecoveryInput!) {
+        result: startPasswordRecovery(data: $data) { status }
     }
 `
 
 const CHECK_PASSWORD_RECOVERY_TOKEN = gql`
-    query checkPasswordRecoveryToken($token: String!) {
-        status: checkPasswordRecoveryToken(token: $token)
+    query checkPasswordRecoveryToken($data: CheckPasswordRecoveryTokenInput!) {
+        result: checkPasswordRecoveryToken(data: $data) { status }
     }
 `
 

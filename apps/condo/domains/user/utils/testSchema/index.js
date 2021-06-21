@@ -148,13 +148,14 @@ async function createTestForgotPasswordAction (client, user, extraAttrs = {}) {
     if (!client) throw new Error('no client')
     if (!user || !user.id) throw new Error('no user.id')
     const sender = { dv: 1, fingerprint: faker.random.alphaNumeric(8) }
-
-    // TODO(codegen): write createTestForgotPasswordAction logic for generate fields
-
+    const now = Date.now()
     const attrs = {
         dv: 1,
         sender,
         user: { connect: { id: user.id } },
+        token: uuid(),
+        requestedAt: new Date(now).toISOString(),
+        expiresAt: new Date(now + CONFIRM_PHONE_ACTION_EXPIRY * 1000).toISOString(),
         ...extraAttrs,
     }
     const obj = await ForgotPasswordAction.create(client, attrs)
@@ -165,8 +166,6 @@ async function updateTestForgotPasswordAction (client, id, extraAttrs = {}) {
     if (!client) throw new Error('no client')
     if (!id) throw new Error('no id')
     const sender = { dv: 1, fingerprint: faker.random.alphaNumeric(8) }
-
-    // TODO(codegen): check the updateTestForgotPasswordAction logic for generate fields
 
     const attrs = {
         dv: 1,

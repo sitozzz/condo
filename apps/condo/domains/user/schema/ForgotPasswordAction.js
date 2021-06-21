@@ -64,12 +64,39 @@ const ForgotPasswordAction = new GQLListSchema('ForgotPasswordAction', {
 })
 
 const ForgotPasswordService = new GQLCustomSchema('ForgotPasswordService', {
+    types: [
+        {
+            access: true,
+            type: 'input CheckPasswordRecoveryTokenInput { token: String! }',
+        },
+        {
+            access: true,
+            type: 'type CheckPasswordRecoveryTokenOutput { status: String! }',
+        },
+        {
+            access: true,
+            type: 'input StartPasswordRecoveryInput { email: String!, sender: JSON!, dv: Int! }',
+        },
+        {
+            access: true,
+            type: 'type StartPasswordRecoveryOutput { status: String! }',
+        },
+        {
+            access: true,
+            type: 'input ChangePasswordWithTokenInput { token: String!, password: String! }',
+        },
+        {
+            access: true,
+            type: 'type ChangePasswordWithTokenOutput { status: String! }',
+        },
+
+    ],
     queries: [
         {
             access: true,
-            schema: 'checkPasswordRecoveryToken(token: String!): String',
+            schema: 'checkPasswordRecoveryToken(data: CheckPasswordRecoveryTokenInput!): CheckPasswordRecoveryTokenOutput',
             resolver: async (parent, args, context, info, extra) => {
-                const { token } = args
+                const { data: { token } } = args
                 const now = extra.extraNow || Date.now()
                 const actions = await ForgotPasswordActionGQL.getAll(context.createContext({ skipAccessControl: true }), {
                     token,
@@ -79,16 +106,16 @@ const ForgotPasswordService = new GQLCustomSchema('ForgotPasswordService', {
                     throw new Error('[error]: Unable to find valid token')
                 }
 
-                return 'ok'
+                return { status: 'ok' }
             },
         },
     ],
     mutations: [
         {
             access: true,
-            schema: 'startPasswordRecovery(email: String!, sender: JSON!, dv:Int!): String',
+            schema: 'startPasswordRecovery(data: StartPasswordRecoveryInput!): StartPasswordRecoveryOutput',
             resolver: async (parent, args, context, info, extra = {}) => {
-                const { email, sender, dv } = args
+                const { data: { email, sender, dv } } = args
                 const extraToken = extra.extraToken || uuid()
                 const extraTokenExpiration = extra.extraTokenExpiration || parseInt(RESET_PASSWORD_TOKEN_EXPIRY)
                 const extraNowTimestamp = extra.extraNowTimestamp || Date.now()
@@ -134,14 +161,14 @@ const ForgotPasswordService = new GQLCustomSchema('ForgotPasswordService', {
                     },
                     sender: sender,
                 })
-                return 'ok'
+                return { status: 'ok' }
             },
         },
         {
             access: true,
-            schema: 'changePasswordWithToken(token: String!, password: String!): String',
+            schema: 'changePasswordWithToken(data: ChangePasswordWithTokenInput!): ChangePasswordWithTokenOutput',
             resolver: async (parent, args, context, info, extra) => {
-                const { token, password } = args
+                const { data: { token, password } } = args
                 const now = extra.extraNow || (new Date(Date.now())).toISOString()
 
                 if (password.length < MIN_PASSWORD_LENGTH) {
@@ -168,7 +195,7 @@ const ForgotPasswordService = new GQLCustomSchema('ForgotPasswordService', {
                     password,
                 })
 
-                return 'ok'
+                return { status: 'ok' }
             },
         },
     ],

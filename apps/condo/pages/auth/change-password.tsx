@@ -46,7 +46,7 @@ const ChangePasswordPage: AuthPage = () => {
         setIsLoading(true)
         return runMutation({
             mutation: changePassword,
-            variables: values,
+            variables: { data: values },
             onFinally: () => {
                 setIsLoading(false)
                 if (userId) {
@@ -69,7 +69,7 @@ const ChangePasswordPage: AuthPage = () => {
     })
     const [recoveryTokenError, setRecoveryTokenError] = useState<Error | null>(null)
     useEffect(() => {
-        checkPasswordRecoveryToken({ variables: { token } })
+        checkPasswordRecoveryToken({ variables: { data: { token } } })
     }, [])
 
     if (recoveryTokenError) {
