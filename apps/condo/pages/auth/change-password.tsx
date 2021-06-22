@@ -42,11 +42,12 @@ const ChangePasswordPage: AuthPage = () => {
 
     const userId = get(auth, ['user', 'id'])
 
-    const onFinish = values => {
+    const onFinish = (values: typeof initialValues) => {
         setIsLoading(true)
+        const { password, token } = values
         return runMutation({
             mutation: changePassword,
-            variables: { data: values },
+            variables: { data: { password, token } },
             onFinally: () => {
                 setIsLoading(false)
                 if (userId) {
