@@ -23,6 +23,15 @@ export type AcceptOrRejectOrganizationInviteInput = {
   isAccepted?: Maybe<Scalars['Boolean']>;
 };
 
+export type AuthenticateUserWithFirebaseIdTokenInput = {
+  firebaseIdToken: Scalars['String'];
+};
+
+export type AuthenticateUserWithFirebaseIdTokenOutput = {
+  __typename?: 'AuthenticateUserWithFirebaseIdTokenOutput';
+  item?: Maybe<User>;
+};
+
 export type AuthenticateUserWithPhoneAndPasswordInput = {
   phone: Scalars['String'];
   password: Scalars['String'];
@@ -3869,14 +3878,22 @@ export enum CacheControlScope {
   Private = 'PRIVATE'
 }
 
-export type CompleteConfirmPhoneActionInput = {
+export type ChangePasswordWithTokenInput = {
   token: Scalars['String'];
-  smsCode: Scalars['Int'];
-  captcha: Scalars['String'];
+  password: Scalars['String'];
 };
 
-export type CompleteConfirmPhoneActionOutput = {
-  __typename?: 'CompleteConfirmPhoneActionOutput';
+export type ChangePasswordWithTokenOutput = {
+  __typename?: 'ChangePasswordWithTokenOutput';
+  status: Scalars['String'];
+};
+
+export type CheckPasswordRecoveryTokenInput = {
+  token: Scalars['String'];
+};
+
+export type CheckPasswordRecoveryTokenOutput = {
+  __typename?: 'CheckPasswordRecoveryTokenOutput';
   status: Scalars['String'];
 };
 
@@ -4338,7 +4355,7 @@ export type File = {
   publicUrl?: Maybe<Scalars['String']>;
 };
 
-/**  A keystone list  */
+/**  Forgot password actions is used for anonymous user password recovery procedure  */
 export type ForgotPasswordAction = {
   __typename?: 'ForgotPasswordAction';
   /**
@@ -4355,9 +4372,13 @@ export type ForgotPasswordAction = {
   sender?: Maybe<Scalars['JSON']>;
   /**  Ref to the user. The object will be deleted if the user ceases to exist  */
   user?: Maybe<User>;
+  /**  Unique token to complete confirmation  */
   token?: Maybe<Scalars['String']>;
+  /**  DateTime when confirm phone action was started  */
   requestedAt?: Maybe<Scalars['String']>;
+  /**  When password recovery action becomes invalid  */
   expiresAt?: Maybe<Scalars['String']>;
+  /**  When password recovery action was completed  */
   usedAt?: Maybe<Scalars['String']>;
   id: Scalars['ID'];
   v?: Maybe<Scalars['Int']>;
@@ -4736,17 +4757,6 @@ export type ForgotPasswordActionsCreateInput = {
 export type ForgotPasswordActionsUpdateInput = {
   id: Scalars['ID'];
   data?: Maybe<ForgotPasswordActionUpdateInput>;
-};
-
-export type GetPhoneByConfirmPhoneActionTokenInput = {
-  token: Scalars['String'];
-  captcha: Scalars['String'];
-};
-
-export type GetPhoneByConfirmPhoneActionTokenOutput = {
-  __typename?: 'GetPhoneByConfirmPhoneActionTokenOutput';
-  phone: Scalars['String'];
-  isPhoneVerified: Scalars['Boolean'];
 };
 
 export type InviteNewOrganizationEmployeeInput = {
@@ -5875,12 +5885,13 @@ export type Mutation = {
   /**  Delete multiple Message items by ID.  */
   deleteMessages?: Maybe<Array<Maybe<Message>>>;
   registerNewUser?: Maybe<User>;
+  authenticateUserWithFirebaseIdToken?: Maybe<AuthenticateUserWithFirebaseIdTokenOutput>;
   authenticateUserWithPhoneAndPassword?: Maybe<AuthenticateUserWithPhoneAndPasswordOutput>;
-  startPasswordRecovery?: Maybe<Scalars['String']>;
-  changePasswordWithToken?: Maybe<Scalars['String']>;
-  startConfirmPhoneAction?: Maybe<StartConfirmPhoneActionOutput>;
-  resendConfirmPhoneActionSms?: Maybe<ResendConfirmPhoneActionSmsOutput>;
-  completeConfirmPhoneAction?: Maybe<CompleteConfirmPhoneActionOutput>;
+  startPasswordRecovery?: Maybe<StartPasswordRecoveryOutput>;
+  changePasswordWithToken?: Maybe<ChangePasswordWithTokenOutput>;
+  startConfirmPhoneAction?: Maybe<Scalars['String']>;
+  confirmPhoneActionResendSms?: Maybe<Scalars['String']>;
+  completeConfirmPhoneAction?: Maybe<Scalars['String']>;
   registerNewOrganization?: Maybe<Organization>;
   inviteNewOrganizationEmployee?: Maybe<OrganizationEmployee>;
   acceptOrRejectOrganizationInviteById?: Maybe<OrganizationEmployee>;
@@ -7325,36 +7336,42 @@ export type MutationRegisterNewUserArgs = {
 };
 
 
+export type MutationAuthenticateUserWithFirebaseIdTokenArgs = {
+  data: AuthenticateUserWithFirebaseIdTokenInput;
+};
+
+
 export type MutationAuthenticateUserWithPhoneAndPasswordArgs = {
   data: AuthenticateUserWithPhoneAndPasswordInput;
 };
 
 
 export type MutationStartPasswordRecoveryArgs = {
-  email: Scalars['String'];
-  sender: Scalars['JSON'];
-  dv: Scalars['Int'];
+  data: StartPasswordRecoveryInput;
 };
 
 
 export type MutationChangePasswordWithTokenArgs = {
-  token: Scalars['String'];
-  password: Scalars['String'];
+  data: ChangePasswordWithTokenInput;
 };
 
 
 export type MutationStartConfirmPhoneActionArgs = {
-  data: StartConfirmPhoneActionInput;
+  phone: Scalars['String'];
+  dv: Scalars['Int'];
+  sender: Scalars['JSON'];
 };
 
 
-export type MutationResendConfirmPhoneActionSmsArgs = {
-  data: ResendConfirmPhoneActionSmsInput;
+export type MutationConfirmPhoneActionResendSmsArgs = {
+  token: Scalars['String'];
+  sender: Scalars['JSON'];
 };
 
 
 export type MutationCompleteConfirmPhoneActionArgs = {
-  data: CompleteConfirmPhoneActionInput;
+  token: Scalars['String'];
+  smsCode: Scalars['Int'];
 };
 
 
@@ -9633,7 +9650,8 @@ export type Query = {
   _MessagesMeta?: Maybe<_ListMeta>;
   /**  Retrieve the meta-data for all lists.  */
   _ksListsMeta?: Maybe<Array<Maybe<_ListMeta>>>;
-  getPhoneByConfirmPhoneActionToken?: Maybe<GetPhoneByConfirmPhoneActionTokenOutput>;
+  checkPasswordRecoveryToken?: Maybe<CheckPasswordRecoveryTokenOutput>;
+  getPhoneByConfirmPhoneActionToken?: Maybe<Scalars['String']>;
   /** The version of the Keystone application serving this API. */
   appVersion?: Maybe<Scalars['String']>;
   authenticatedUser?: Maybe<User>;
@@ -10795,8 +10813,13 @@ export type Query_KsListsMetaArgs = {
 };
 
 
+export type QueryCheckPasswordRecoveryTokenArgs = {
+  data: CheckPasswordRecoveryTokenInput;
+};
+
+
 export type QueryGetPhoneByConfirmPhoneActionTokenArgs = {
-  data: GetPhoneByConfirmPhoneActionTokenInput;
+  token: Scalars['String'];
 };
 
 export type RegisterNewOrganizationInput = {
@@ -10818,17 +10841,6 @@ export type RegisterNewUserInput = {
   confirmPhoneActionToken?: Maybe<Scalars['String']>;
   phone?: Maybe<Scalars['String']>;
   meta?: Maybe<Scalars['JSON']>;
-};
-
-export type ResendConfirmPhoneActionSmsInput = {
-  token: Scalars['String'];
-  sender: Scalars['JSON'];
-  captcha: Scalars['String'];
-};
-
-export type ResendConfirmPhoneActionSmsOutput = {
-  __typename?: 'ResendConfirmPhoneActionSmsOutput';
-  status: Scalars['String'];
 };
 
 export type ResendMessageInput = {
@@ -12295,16 +12307,15 @@ export enum SortUsersBy {
   DeletedAtDesc = 'deletedAt_DESC'
 }
 
-export type StartConfirmPhoneActionInput = {
-  phone: Scalars['String'];
-  dv: Scalars['Int'];
+export type StartPasswordRecoveryInput = {
+  email: Scalars['String'];
   sender: Scalars['JSON'];
-  captcha: Scalars['String'];
+  dv: Scalars['Int'];
 };
 
-export type StartConfirmPhoneActionOutput = {
-  __typename?: 'StartConfirmPhoneActionOutput';
-  token: Scalars['String'];
+export type StartPasswordRecoveryOutput = {
+  __typename?: 'StartPasswordRecoveryOutput';
+  status: Scalars['String'];
 };
 
 /**  Users request or contact with the user  */

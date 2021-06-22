@@ -71,7 +71,7 @@ const ResetPage: AuthPage = () => {
         }
         return runMutation({
             mutation: startPasswordRecovery,
-            variables: values,
+            variables: { data: values },
             onCompleted: () => {
                 setIsLoading(false)
                 setIsSuccessMessage(true)
