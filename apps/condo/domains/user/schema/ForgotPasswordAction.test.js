@@ -17,31 +17,35 @@ describe('ForgotPasswordAction', () => {
             const admin = await makeLoggedInAdminClient()
             const [user] = await createTestUser(admin)
             const client = await makeClient()
+            let error
             try {
                 await createTestForgotPasswordAction(client, user)
             } catch (e) {
-                expect(e.errors[0]).toMatchObject({
-                    'message': 'You do not have access to this resource',
-                    'name': 'AccessDeniedError',
-                    'path': ['obj'],
-                })
-                expect(e.data).toEqual({ 'obj': null })
+                error = e
             }
+            expect(error).toBeDefined()
+            expect(error.errors[0]).toMatchObject({
+                'message': 'You do not have access to this resource',
+                'name': 'AccessDeniedError',
+                'path': ['obj'],
+            })
         })
 
         it('cant read', async () => {
             const client = await makeClient()
-
+            let error
             try {
                 await ForgotPasswordAction.getAll(client)
             } catch (e) {
-                expect(e.errors[0]).toMatchObject({
-                    'message': 'You do not have access to this resource',
-                    'name': 'AccessDeniedError',
-                    'path': ['objs'],
-                })
-                expect(e.data).toEqual({ 'objs': null })
+                error = e
             }
+            expect(error).toBeDefined()
+            expect(error.errors[0]).toMatchObject({
+                'message': 'You do not have access to this resource',
+                'name': 'AccessDeniedError',
+                'path': ['objs'],
+            })
+            expect(error.data).toEqual({ 'objs': null })
         })
 
         it('cant update', async () => {
@@ -51,17 +55,20 @@ describe('ForgotPasswordAction', () => {
 
             const [objCreated] = await createTestForgotPasswordAction(admin, user)
             const usedAt = new Date(Date.now()).toISOString()
-
+            let error
             try {
                 await updateTestForgotPasswordAction(client, objCreated.id, { usedAt })
             } catch (e) {
-                expect(e.errors[0]).toMatchObject({
-                    'message': 'You do not have access to this resource',
-                    'name': 'AccessDeniedError',
-                    'path': ['obj'],
-                })
-                expect(e.data).toEqual({ 'obj': null })
+                error = e
             }
+
+            expect(error).toBeDefined()
+            expect(error.errors[0]).toMatchObject({
+                'message': 'You do not have access to this resource',
+                'name': 'AccessDeniedError',
+                'path': ['obj'],
+            })
+            expect(error.data).toEqual({ 'obj': null })
         })
 
         it('cant delete', async () => {
@@ -70,16 +77,20 @@ describe('ForgotPasswordAction', () => {
             const client = await makeClient()
 
             const [objCreated] = await createTestForgotPasswordAction(admin, user)
+            let error
             try {
                 await ForgotPasswordAction.delete(client, objCreated.id)
             } catch (e) {
-                expect(e.errors[0]).toMatchObject({
-                    'message': 'You do not have access to this resource',
-                    'name': 'AccessDeniedError',
-                    'path': ['obj'],
-                })
-                expect(e.data).toEqual({ 'obj': null })
+                error = e
             }
+
+            expect(error).toBeDefined()
+            expect(error.errors[0]).toMatchObject({
+                'message': 'You do not have access to this resource',
+                'name': 'AccessDeniedError',
+                'path': ['obj'],
+            })
+            expect(error.data).toEqual({ 'obj': null })
         })
     })
 })
