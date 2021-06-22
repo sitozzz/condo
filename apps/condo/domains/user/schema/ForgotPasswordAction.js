@@ -98,7 +98,7 @@ const ForgotPasswordService = new GQLCustomSchema('ForgotPasswordService', {
             resolver: async (parent, args, context, info, extra) => {
                 const { data: { token } } = args
                 const now = extra.extraNow || Date.now()
-                const actions = await ForgotPasswordActionGQL.getAll(context.createContext({ skipAccessControl: true }), {
+                const actions = await ForgotPasswordActionGQL.getAll(context, {
                     token,
                     expiresAt_gte: new Date(now).toISOString(),
                 })
@@ -123,7 +123,7 @@ const ForgotPasswordService = new GQLCustomSchema('ForgotPasswordService', {
                 const requestedAt = new Date(extraNowTimestamp).toISOString()
                 const expiresAt = new Date(extraNowTimestamp + extraTokenExpiration).toISOString()
 
-                const users = await User.getAll(context.createContext({ skipAccessControl: true }), {
+                const users = await User.getAll(context, {
                     email,
                 })
 
@@ -136,7 +136,7 @@ const ForgotPasswordService = new GQLCustomSchema('ForgotPasswordService', {
                 }
 
                 const userId = users[0].id
-                await ForgotPasswordActionGQL.create(context.createContext({ skipAccessControl: true }), {
+                await ForgotPasswordActionGQL.create(context, {
                     dv,
                     sender,
                     user: { connect: { id: userId } },
@@ -174,7 +174,7 @@ const ForgotPasswordService = new GQLCustomSchema('ForgotPasswordService', {
                 if (password.length < MIN_PASSWORD_LENGTH) {
                     throw new Error(`${PASSWORD_TOO_SHORT}] Password too short`)
                 }
-                const forgotPasswordData = await ForgotPasswordActionGQL.getAll(context.createContext({ skipAccessControl: true }), {
+                const forgotPasswordData = await ForgotPasswordActionGQL.getAll(context, {
                     token,
                     expiresAt_gte: now,
                 })
@@ -187,11 +187,11 @@ const ForgotPasswordService = new GQLCustomSchema('ForgotPasswordService', {
                 const tokenId = forgotPasswordData[0].id
 
                 // mark token as used
-                await ForgotPasswordActionGQL.update(context.createContext({ skipAccessControl: true }), tokenId, {
+                await ForgotPasswordActionGQL.update(context, tokenId, {
                     usedAt: now,
                 })
 
-                await User.update(context.createContext({ skipAccessControl: true }), userId, {
+                await User.update(context, userId, {
                     password,
                 })
 
