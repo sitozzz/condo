@@ -56,8 +56,7 @@ const getTicketCounts = async (context, where, groupBy, extraLabels = {}) => {
                 break
         }
     }
-
-    return analyticsQueryBuilder
+    return  analyticsQueryBuilder
         .getResult(({ count, dayGroup, ...searchResult }) =>
         {
             if (!isEmpty(translates)) {
@@ -97,19 +96,16 @@ const aggregateData = (data, groupByFilter) => {
     return { result, groupKeys: [axisGroupKey, labelsGroupKey] }
 }
 
-const ticketAnalyticsExcelExportDataMapper = (data) => {
+const ticketAnalyticsExcelExportDataMapper = (data, where = {}, groupBy = [], translates = {}) => {
     const uniqueDates = Array.from(new Set(Object.values(data).flatMap(e => Object.keys(e))))
     const result = []
+    const address = get(translates, 'property')
+
     uniqueDates.forEach((date, key) => {
         const restTableColumns = {}
         Object.keys(data).forEach(ticketType => {
             restTableColumns[ticketType] = data[ticketType][date]
         })
-        let address = 'Все адреса'
-        // const addressList = get(filters, 'addresses')
-        // if (addressList && addressList.length) {
-        //     address = addressList.join(', ')
-        // }
         result.push({ key, address, date, ...restTableColumns })
     })
     return result
@@ -135,6 +131,10 @@ const TicketAnalyticsReportService = new GQLCustomSchema('TicketAnalyticsReportS
         },
         {
             access: true,
+            type: 'input ExportTicketAnalyticsToExcelInput { where: TicketWhereInput!, groupBy: [TicketAnalyticsGroupBy!], translates: JSON }',
+        },
+        {
+            access: true,
             type: 'type ExportTicketAnalyticsToExcelOutput { link: String! }',
         },
     ],
@@ -150,14 +150,14 @@ const TicketAnalyticsReportService = new GQLCustomSchema('TicketAnalyticsReportS
         },
         {
             access: access.canReadTicketAnalyticsReport,
-            schema: 'exportTicketAnalyticsToExcel(data: TicketAnalyticsReportInput): ExportTicketAnalyticsToExcelOutput',
+            schema: 'exportTicketAnalyticsToExcel(data: ExportTicketAnalyticsToExcelInput): ExportTicketAnalyticsToExcelOutput',
             resolver: async (parent, args, context, info, extra = {}) => {
-                const { data: { where = {}, groupBy = [] } } = args
+                const { data: { where = {}, groupBy = [], translates = {} } } = args
                 const ticketCounts = await getTicketCounts(context, where, groupBy, { status: 'type' })
                 const { result, groupKeys } = aggregateData(ticketCounts, groupBy)
                 const ticketAccessCheck = await Ticket.getAll(context, where, { first: 1 })
                 const [groupBy1, groupBy2] = groupKeys
-                const excelRows = ticketAnalyticsExcelExportDataMapper(result)
+                const excelRows = ticketAnalyticsExcelExportDataMapper(result, where, groupBy, translates)
                 const link = await createExportFile({
                     fileName: `ticket_analytics_${moment().format('DD_MM')}.xlsx`,
                     templatePath: `./domains/ticket/templates/TicketAnalyticsExportTemplate[${groupBy1}_${groupBy2}].xlsx`,

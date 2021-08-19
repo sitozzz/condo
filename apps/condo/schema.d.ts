@@ -5655,6 +5655,12 @@ export type DivisionsUpdateInput = {
   data?: Maybe<DivisionUpdateInput>;
 };
 
+export type ExportTicketAnalyticsToExcelInput = {
+  where: TicketWhereInput;
+  groupBy?: Maybe<Array<TicketAnalyticsGroupBy>>;
+  translates?: Maybe<Scalars['JSON']>;
+};
+
 export type ExportTicketAnalyticsToExcelOutput = {
   __typename?: 'ExportTicketAnalyticsToExcelOutput';
   link: Scalars['String'];
@@ -14246,7 +14252,7 @@ export type QueryTicketAnalyticsReportArgs = {
 
 
 export type QueryExportTicketAnalyticsToExcelArgs = {
-  data?: Maybe<TicketAnalyticsReportInput>;
+  data?: Maybe<ExportTicketAnalyticsToExcelInput>;
 };
 
 
